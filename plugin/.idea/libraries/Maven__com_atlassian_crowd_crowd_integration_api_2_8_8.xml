@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.atlassian.crowd:crowd-integration-api:2.8.8">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/crowd/crowd-integration-api/2.8.8/crowd-integration-api-2.8.8.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/crowd/crowd-integration-api/2.8.8/crowd-integration-api-2.8.8-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/crowd/crowd-integration-api/2.8.8/crowd-integration-api-2.8.8-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

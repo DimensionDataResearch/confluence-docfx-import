@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.owasp.antisamy:antisamy:1.5.3-atlassian-2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/owasp/antisamy/antisamy/1.5.3-atlassian-2/antisamy-1.5.3-atlassian-2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/owasp/antisamy/antisamy/1.5.3-atlassian-2/antisamy-1.5.3-atlassian-2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/owasp/antisamy/antisamy/1.5.3-atlassian-2/antisamy-1.5.3-atlassian-2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

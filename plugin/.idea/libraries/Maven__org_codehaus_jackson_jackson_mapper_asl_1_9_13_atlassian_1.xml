@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.13-atlassian-1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-mapper-asl/1.9.13-atlassian-1/jackson-mapper-asl-1.9.13-atlassian-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-mapper-asl/1.9.13-atlassian-1/jackson-mapper-asl-1.9.13-atlassian-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-mapper-asl/1.9.13-atlassian-1/jackson-mapper-asl-1.9.13-atlassian-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

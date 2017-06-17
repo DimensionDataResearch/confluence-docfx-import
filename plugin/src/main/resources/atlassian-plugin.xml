@@ -1,0 +1,36 @@
+<atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        <param name="plugin-icon">images/pluginIcon.png</param>
+        <param name="plugin-logo">images/pluginLogo.png</param>
+    </plugin-info>
+
+    <!-- add our i18n resource -->
+    <resource type="i18n" name="i18n" location="docfx_import"/>
+    
+    <!-- add our web resources -->
+    <web-resource key="docfx_import-resources" name="DocFX Import Web Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        
+        <resource type="download" name="docfx_import.css" location="/css/docfx_import.css"/>
+        <resource type="download" name="docfx_import.js" location="/js/docfx_import.js"/>
+        <resource type="download" name="images/" location="/images"/>
+
+        <context>docfx_import</context>
+    </web-resource>
+
+    <!-- Index DocFX-specific metadata -->
+    <content-property-index-schema key="docfx_import-props-index" name="DocFX Import Properties Index">
+        <key property-key="attachments">
+            <extract path="id" type="string" />
+            <extract path="description" type="text" />
+            <extract path="editDate" type="date" />
+        </key>
+        <key property-key="metadata">
+            <extract path="content.uid" type="string" />
+        </key>
+    </content-property-index-schema>
+    
+</atlassian-plugin>

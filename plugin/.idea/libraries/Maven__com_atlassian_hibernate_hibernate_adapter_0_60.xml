@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.atlassian.hibernate:hibernate.adapter:0.60">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/hibernate/hibernate.adapter/0.60/hibernate.adapter-0.60.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/hibernate/hibernate.adapter/0.60/hibernate.adapter-0.60-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/hibernate/hibernate.adapter/0.60/hibernate.adapter-0.60-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

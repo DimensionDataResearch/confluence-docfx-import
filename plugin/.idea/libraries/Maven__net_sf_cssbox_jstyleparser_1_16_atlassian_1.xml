@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: net.sf.cssbox:jstyleparser:1.16-atlassian-1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/sf/cssbox/jstyleparser/1.16-atlassian-1/jstyleparser-1.16-atlassian-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/net/sf/cssbox/jstyleparser/1.16-atlassian-1/jstyleparser-1.16-atlassian-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/sf/cssbox/jstyleparser/1.16-atlassian-1/jstyleparser-1.16-atlassian-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

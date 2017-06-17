@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.atlassian.plugins:atlassian-plugins-webresource:3.5.19-0d24cbc">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/plugins/atlassian-plugins-webresource/3.5.19-0d24cbc/atlassian-plugins-webresource-3.5.19-0d24cbc.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/plugins/atlassian-plugins-webresource/3.5.19-0d24cbc/atlassian-plugins-webresource-3.5.19-0d24cbc-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/atlassian/plugins/atlassian-plugins-webresource/3.5.19-0d24cbc/atlassian-plugins-webresource-3.5.19-0d24cbc-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
