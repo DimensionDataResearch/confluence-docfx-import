@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.tintoy.confluence.plugin</groupId>
     <artifactId>docfx_import</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-ALPHA1</version>
 
     <organization>
         <name>Dimension Data Research</name>
