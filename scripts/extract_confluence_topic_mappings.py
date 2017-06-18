@@ -61,8 +61,10 @@ def load_page_mappings(confluence_address, confluence_user, confluence_password)
     Load page-mappings from Confluence.
 
     :param confluence_address: The base address for the Confluence server.
-    :returns: A list of Confluence page mappings (confluence_id, docfx_uid, docfx_href).
-    :rtype: dict
+    :param confluence_user: The user name for authentication to Confluence.
+    :param confluence_password: The password for authentication to Confluence.
+    :returns: A list of Confluence page mappings: {confluence_id, docfx_uid, docfx_href}.
+    :rtype: list
     """
 
     page_mappings = []
