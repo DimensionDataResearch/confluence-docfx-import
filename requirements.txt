@@ -1,2 +1,4 @@
 requests>=2.0
 pyaml>=3.0
+scrapy>=1.4
+pypiwin32>=220
