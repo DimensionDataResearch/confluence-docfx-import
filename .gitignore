@@ -40,3 +40,6 @@ hs_err_pid*
 
 # Compiled DocFX site
 **/_site/
+
+# Project
+.vscode/.ropeproject/objectdb

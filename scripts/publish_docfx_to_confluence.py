@@ -13,6 +13,10 @@ import requests
 import urllib.parse as urlparse
 import yaml
 
+DOCFX_LANGUAGE_MAP = {
+    "csharp": "c#"
+}
+
 def main():
     """
     The main program entry-point.
@@ -36,23 +40,21 @@ def main():
         entry["docfx_href"].lstrip("/") : entry["confluence_id"] for entry in confluence_mappings
     }
 
-    existing_mappings = []
+    mappings = []
+    new_mappings = []
     for mapping in docfx_mappings:
         docfx_uid = mapping["uid"]
         confluence_id = docfx_uid_to_confluence_id.get(docfx_uid)
         if confluence_id is None:
-            print("WARNING: No mapping in Confluence for DocFX UID '{}'.".format(docfx_uid))
+            print("No mapping in Confluence for DocFX UID '{}' (a new page will be created).".format(docfx_uid))
+            new_mappings.append(mapping)
 
             continue
 
         mapping["confluence_id"] = confluence_id
-        existing_mappings.append(mapping)
+        mappings.append(mapping)
 
-    new_mappings = [
-        docfx_mapping for docfx_mapping in docfx_mappings
-        if docfx_mapping["uid"] not in docfx_uid_to_confluence_id
-    ]
-
+    # Create placeholders for pages that don't exist yet.
     if new_mappings:
         print("Need to create {} new pages in confluence:".format(
             len(new_mappings)
@@ -72,11 +74,11 @@ def main():
             mapping["confluence_id"] = confluence_id
             docfx_uid_to_confluence_id[mapping["uid"]] = confluence_id
             docfx_href_to_confluence_id[mapping["href"]] = confluence_id
-            print("\t\tCreated:  {href} (UID='{uid}') => {confluence_id}".format(**mapping))
-            existing_mappings.append(mapping)
+            print("\tCreated:  {href} (UID='{uid}') => {confluence_id}".format(**mapping))
+            mappings.append(mapping)
 
-    # Now update content for all pages.
-    for mapping in existing_mappings:
+    # Now that we know all the page Ids, update content.
+    for mapping in mappings:
         mapping["title"] = "DocFX - {name} ({uid})".format(**mapping)
         print("\t{href} (UID='{uid}') => '{title}'".format(**mapping))
 
@@ -89,7 +91,7 @@ def main():
                 line.lstrip("\xef\xbb\xbf") for line in page_content_file.readlines()
             ))
 
-            page_content = transform_links(page_dir, page_content, docfx_href_to_confluence_id)
+            page_content = transform_content(page_dir, page_content, docfx_href_to_confluence_id)
 
         print("Updating Confluence page {}...".format(mapping["confluence_id"]))
         confluence_client.update_page(
@@ -99,11 +101,11 @@ def main():
             docfx_uid=mapping["uid"],
             docfx_href=mapping["href"]
         )
-        print("\t\tUpdated: {href} (UID='{uid}') => {confluence_id}".format(**mapping))
+        print("\tUpdated: {href} (UID='{uid}') => {confluence_id}".format(**mapping))
 
-def transform_links(base_dir, content, mappings):
+def transform_content(base_dir, content, mappings):
     """
-    Transform links in HTML content so they point to Confluence pages, etc.
+    Transform markup and links in HTML content for compatibility with Confluence.
 
     :param base_dir: The base directory for the content (all links are evaluated relative to this). The root is "", not "/".
     :param content: The HTML content.
@@ -117,6 +119,8 @@ def transform_links(base_dir, content, mappings):
     """
 
     content_html = html.fragment_fromstring(content, create_parent="div")
+
+    # Hyperlinks
     anchors = content_html.cssselect("a.xref")
     for anchor in anchors:
         href = anchor.attrib.get("href")
@@ -135,6 +139,45 @@ def transform_links(base_dir, content, mappings):
             continue
 
         anchor.attrib["href"] = href.replace(path, "/pages/viewpage.action?pageId={}".format(page_id))
+
+    # Code blocks
+    code_wrapper_blocks = content_html.cssselect("div.codewrapper")
+    for code_wrapper_block in code_wrapper_blocks:
+        code_block = next(code_wrapper_block.cssselect("pre code"))
+        if code_block is None:
+            continue
+
+        code_language = None
+        block_classes = code_block.attrib.get("class", default="").split(" ")
+        for block_class in block_classes:
+            if block_class.startsWith("lang-"):
+                code_language = block_class.replace("lang-", "")
+
+                break
+
+        if code_language is None:
+            continue
+
+        code_language = DOCFX_LANGUAGE_MAP.get(code_language) or code_language
+        code = code_block.text_content
+
+        code_macro = """
+            <ac:structured-macro
+                ac:name="code"
+                ac:schema-version="1"
+            >
+                <ac:parameter ac:name="language">{}</ac:parameter>
+                <ac:plain-text-body>
+                    <![CDATA[{}]]>
+                </ac:plain-text-body>
+            </ac:structured-macro>
+        """.format(code_language, code)
+
+        # Replace contents with our code macro.
+        for child in code_wrapper_block.iterchildren():
+            code_wrapper_block.remove(child)
+
+        code_wrapper_block.text_content = code_macro
 
     # Aaaand.. back to a regular string (since that's what we need to encode it in JSON).
     return codecs.decode(b"\n".join((
