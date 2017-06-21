@@ -5,7 +5,6 @@ Script for publishing content from a generated DocFX web site to Confluence.
 """
 
 import argparse
-import codecs
 import json
 import lxml.etree as xml
 import lxml.html as html
@@ -17,6 +16,7 @@ import yaml
 DOCFX_LANGUAGE_MAP = {
     "csharp": "c#"
 }
+
 
 def main():
     """
@@ -35,10 +35,10 @@ def main():
     confluence_mappings = get_confluence_mappings(confluence_client, args.confluence_space)
 
     docfx_uid_to_confluence_id = {
-        entry["docfx_uid"] : entry["confluence_id"] for entry in confluence_mappings
+        entry["docfx_uid"]: entry["confluence_id"] for entry in confluence_mappings
     }
     docfx_href_to_confluence_id = {
-        entry["docfx_href"].lstrip("/") : entry["confluence_id"] for entry in confluence_mappings
+        entry["docfx_href"].lstrip("/"): entry["confluence_id"] for entry in confluence_mappings
     }
 
     mappings = []
@@ -85,7 +85,7 @@ def main():
 
         page_href = mapping["href"]
         _, _, page_path, _, _ = urlparse.urlsplit(page_href)
-        print(page_path)
+
         page_dir = os.path.dirname(page_path.lstrip("/"))
         page_local_path = os.path.join(base_directory,
             page_path.lstrip("/").replace("/", "\\")
@@ -96,7 +96,6 @@ def main():
             ))
 
             page_content = transform_content(page_dir, page_content, docfx_href_to_confluence_id)
-            print(page_content)
 
         print("Updating Confluence page {}...".format(mapping["confluence_id"]))
         confluence_client.update_page(
@@ -106,7 +105,8 @@ def main():
             docfx_uid=mapping["uid"],
             docfx_href=mapping["href"]
         )
-        print("\tUpdated: {href} (UID='{uid}') => {confluence_id}".format(**mapping))
+        print("Updated: {href} (UID='{uid}') => {confluence_id}".format(**mapping))
+
 
 def transform_content(base_dir, content, mappings):
     """
@@ -183,9 +183,12 @@ def transform_content(base_dir, content, mappings):
         code_wrapper_block.getparent().replace(code_wrapper_block, code_macro)
 
     # Aaaand.. back to a regular string (since that's what we need to encode it in JSON).
-    return "\n".join((
+    transformed_content_html = b"\n".join((
         render_element(element) for element in content_html.getchildren()
     ))
+
+    return transformed_content_html.decode()
+
 
 def render_element(element):
     """
@@ -193,16 +196,17 @@ def render_element(element):
 
     :param element: The HTML element.
     :returns: The rendered element.
+    :rtype: bytes
     """
 
-    rendered = codecs.decode(html.tostring(element))
+    rendered = html.tostring(element)
 
     # Remove temporary namespace; we had to be sneaky to get the "ac" prefix to stick.
-    rendered = rendered.replace('xmlns:ac="urn:ac"', '')
+    rendered = rendered.replace(b'xmlns:ac="urn:ac"', b'')
 
     # And since this is HTML, we also have to be sneaky when it comes to rendering CDATA elements.
-    rendered = rendered.replace('<ac:plain-text-body>', '<ac:plain-text-body><![CDATA[')
-    rendered = rendered.replace('</ac:plain-text-body>', ']]></ac:plain-text-body>')
+    rendered = rendered.replace(b'<ac:plain-text-body>', b'<ac:plain-text-body><![CDATA[')
+    rendered = rendered.replace(b'</ac:plain-text-body>', b']]></ac:plain-text-body>')
 
     return rendered
 
@@ -222,7 +226,7 @@ def get_confluence_mappings(confluence_client, space_key):
     mappings = []
 
     step = 50
-    uri_template="space/{space_key}/content?type=page&expand=metadata.properties.docfx&start={start}&limit={limit}"
+    uri_template = "space/{space_key}/content?type=page&expand=metadata.properties.docfx&start={start}&limit={limit}"
 
     offset = 0
     while True:
@@ -234,12 +238,12 @@ def get_confluence_mappings(confluence_client, space_key):
 
         results = results["page"]
         if results["size"] == 0:
-            break # No more records.
+            break  # No more records.
 
         for result in results["results"]:
             properties = result["metadata"]["properties"]
             if "docfx" not in properties:
-                continue # Page does not have DocFX properties.
+                continue  # Page does not have DocFX properties.
 
             docfx_properties = properties["docfx"]["value"]["content"]
 
@@ -253,6 +257,7 @@ def get_confluence_mappings(confluence_client, space_key):
 
     return mappings
 
+
 def load_docfx_manifest(filename):
     """
     Load and parse a DocFX site manifest from the specified file.
@@ -265,6 +270,7 @@ def load_docfx_manifest(filename):
     with open(filename) as docfx_manifest_file:
         return json.load(docfx_manifest_file)
 
+
 def load_docfx_xref_map(filename):
     """
     Load and parse a DocFX cross-reference map from the specified file.
@@ -276,6 +282,7 @@ def load_docfx_xref_map(filename):
 
     with open(filename) as xref_map_file:
         return yaml.load(xref_map_file)["references"]
+
 
 def parse_args():
     """
@@ -311,13 +318,19 @@ def parse_args():
     args = parser.parse_args()
 
     if not args.confluence_address:
-        parser.exit(status=1, message="Must specify address of Confluence server using --confluence-address argument or CONFLUENCE_ADDR environment variable.")
+        parser.exit(status=1,
+            message="Must specify address of Confluence server using --confluence-address argument or CONFLUENCE_ADDR environment variable."
+        )
 
     if not args.confluence_user:
-        parser.exit(status=1, message="Must specify user name for authentication to Confluence server using --confluence-user argument or CONFLUENCE_USER environment variable.")
+        parser.exit(status=1,
+            message="Must specify user name for authentication to Confluence server using --confluence-user argument or CONFLUENCE_USER environment variable."
+        )
 
     if not args.confluence_password:
-        parser.exit(status=1, message="Must specify password for authentication to Confluence server using --confluence-password argument or CONFLUENCE_PASSWORD environment variable.")
+        parser.exit(status=1,
+            message="Must specify password for authentication to Confluence server using --confluence-password argument or CONFLUENCE_PASSWORD environment variable."
+        )
 
     return args
 
@@ -332,10 +345,10 @@ class ConfluenceClient(object):
         Create a new ConfluenceClient.
 
         :param base_address: The base address of the Confluence REST API end-point.
-        :param user: The user name for authenticating to Confluence.
+        :param username: The user name for authenticating to Confluence.
         :param password: The password for authenticating to Confluence.
         :type base_address: str
-        :type user: str
+        :type username: str
         :type password: str
         """
 
@@ -462,7 +475,7 @@ class ConfluenceClient(object):
             raise Exception(response["message"])
 
         property_url = "content/{}/property".format(page_id)
-        response = self.post_json(property_url, data={
+        self.post_json(property_url, data={
             "key": "docfx",
             "value": {
                 "description": "DocFX page properties",
@@ -483,7 +496,7 @@ class ConfluenceClient(object):
         """
 
         target_url = urlparse.urljoin(self.base_address, relative_url)
-        response = self.session.get(target_url, *kwargs)
+        response = self.session.get(target_url, **kwargs)
 
         return response.json()
 
@@ -499,7 +512,7 @@ class ConfluenceClient(object):
         if data is not str:
             data = json.dumps(data)
 
-        response = self.session.post(target_url, data, *kwargs)
+        response = self.session.post(target_url, data, **kwargs)
 
         return response.json()
 
@@ -515,7 +528,7 @@ class ConfluenceClient(object):
         if data is not str:
             data = json.dumps(data)
 
-        response = self.session.put(target_url, data, *kwargs)
+        response = self.session.put(target_url, data, **kwargs)
 
         return response.json()
 
@@ -527,7 +540,7 @@ class ConfluenceClient(object):
         """
 
         target_url = urlparse.urljoin(self.base_address, relative_url)
-        response = self.session.delete(target_url, *kwargs)
+        response = self.session.delete(target_url, **kwargs)
 
         if response.text:
             return response.json()
