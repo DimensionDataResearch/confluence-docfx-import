@@ -96,6 +96,7 @@ def main():
             ))
 
             page_content = transform_content(page_dir, page_content, docfx_href_to_confluence_id)
+            print(page_content)
 
         print("Updating Confluence page {}...".format(mapping["confluence_id"]))
         confluence_client.update_page(
@@ -170,25 +171,41 @@ def transform_content(base_dir, content, mappings):
         code_macro_content = """
             <ac:structured-macro xmlns:ac="urn:ac"
                 ac:name="code"
-                ac:schema-version="1"
             >
                 <ac:parameter ac:name="language">{}</ac:parameter>
                 <ac:plain-text-body><![CDATA[{}]]></ac:plain-text-body>
             </ac:structured-macro>
         """.format(code_language, code_block.text)
+
         code_macro = xml.fromstring(code_macro_content, xml_parser)
 
         # Replace contents with our code macro.
-        for child in code_wrapper_block.iterchildren():
-            code_wrapper_block.remove(child)
-
-        code_wrapper_block.append(code_macro)
+        code_wrapper_block.getparent().replace(code_wrapper_block, code_macro)
 
     # Aaaand.. back to a regular string (since that's what we need to encode it in JSON).
     return "\n".join((
-        codecs.decode(html.tostring(element)).replace('xmlns:ac="urn:ac"', '') # We have to be sneaky to preserve the "ac" prefix in some elements.
-        for element in content_html.getchildren()
+        render_element(element) for element in content_html.getchildren()
     ))
+
+def render_element(element):
+    """
+    Render a transformed HTML element as a string.
+
+    :param element: The HTML element.
+    :returns: The rendered element.
+    """
+
+    rendered = codecs.decode(html.tostring(element))
+
+    # Remove temporary namespace; we had to be sneaky to get the "ac" prefix to stick.
+    rendered = rendered.replace('xmlns:ac="urn:ac"', '')
+
+    # And since this is HTML, we also have to be sneaky when it comes to rendering CDATA elements.
+    rendered = rendered.replace('<ac:plain-text-body>', '<ac:plain-text-body><![CDATA[')
+    rendered = rendered.replace('</ac:plain-text-body>', ']]></ac:plain-text-body>')
+
+    return rendered
+
 
 def get_confluence_mappings(confluence_client, space_key):
     """
