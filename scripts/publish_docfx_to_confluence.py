@@ -7,6 +7,7 @@ Script for publishing content from a generated DocFX web site to Confluence.
 import argparse
 import codecs
 import json
+import lxml.etree as xml
 import lxml.html as html
 import os
 import requests
@@ -31,7 +32,7 @@ def main():
     )
 
     confluence_client = ConfluenceClient(args.confluence_address, args.confluence_user, args.confluence_password)
-    confluence_mappings = get_confluence_mappings(confluence_client)
+    confluence_mappings = get_confluence_mappings(confluence_client, args.confluence_space)
 
     docfx_uid_to_confluence_id = {
         entry["docfx_uid"] : entry["confluence_id"] for entry in confluence_mappings
@@ -65,7 +66,7 @@ def main():
             print("\t{href} (UID='{uid}') => '{title}'".format(**mapping))
 
             confluence_id = confluence_client.create_page(
-                space_key="TEST",
+                space_key=args.confluence_space,
                 title=mapping["title"],
                 content="<h1>Placeholder</h1>\nThis page is a placeholder.",
                 docfx_uid=mapping["uid"],
@@ -82,9 +83,12 @@ def main():
         mapping["title"] = "DocFX - {name} ({uid})".format(**mapping)
         print("\t{href} (UID='{uid}') => '{title}'".format(**mapping))
 
-        page_dir = os.path.dirname(mapping["href"].lstrip("/"))
+        page_href = mapping["href"]
+        _, _, page_path, _, _ = urlparse.urlsplit(page_href)
+        print(page_path)
+        page_dir = os.path.dirname(page_path.lstrip("/"))
         page_local_path = os.path.join(base_directory,
-            mapping["href"].lstrip("/").replace("/", "\\")
+            page_path.lstrip("/").replace("/", "\\")
         )
         with open(page_local_path) as page_content_file:
             page_content = '\n'.join((
@@ -141,16 +145,19 @@ def transform_content(base_dir, content, mappings):
         anchor.attrib["href"] = href.replace(path, "/pages/viewpage.action?pageId={}".format(page_id))
 
     # Code blocks
+    xml_parser = xml.XMLParser(strip_cdata=False)
     code_wrapper_blocks = content_html.cssselect("div.codewrapper")
     for code_wrapper_block in code_wrapper_blocks:
-        code_block = next(code_wrapper_block.cssselect("pre code"))
-        if code_block is None:
+        code_blocks = code_wrapper_block.cssselect("pre code")
+        if not code_blocks:
             continue
+
+        code_block = code_blocks[0]
 
         code_language = None
         block_classes = code_block.attrib.get("class", default="").split(" ")
         for block_class in block_classes:
-            if block_class.startsWith("lang-"):
+            if block_class.startswith("lang-"):
                 code_language = block_class.replace("lang-", "")
 
                 break
@@ -159,51 +166,56 @@ def transform_content(base_dir, content, mappings):
             continue
 
         code_language = DOCFX_LANGUAGE_MAP.get(code_language) or code_language
-        code = code_block.text_content
 
-        code_macro = """
-            <ac:structured-macro
+        code_macro_content = """
+            <ac:structured-macro xmlns:ac="urn:ac"
                 ac:name="code"
                 ac:schema-version="1"
             >
                 <ac:parameter ac:name="language">{}</ac:parameter>
-                <ac:plain-text-body>
-                    <![CDATA[{}]]>
-                </ac:plain-text-body>
+                <ac:plain-text-body><![CDATA[{}]]></ac:plain-text-body>
             </ac:structured-macro>
-        """.format(code_language, code)
+        """.format(code_language, code_block.text)
+        code_macro = xml.fromstring(code_macro_content, xml_parser)
 
         # Replace contents with our code macro.
         for child in code_wrapper_block.iterchildren():
             code_wrapper_block.remove(child)
 
-        code_wrapper_block.text_content = code_macro
+        code_wrapper_block.append(code_macro)
 
     # Aaaand.. back to a regular string (since that's what we need to encode it in JSON).
-    return codecs.decode(b"\n".join((
-        html.tostring(element) for element in content_html.getchildren()
-    )))
+    return "\n".join((
+        codecs.decode(html.tostring(element)).replace('xmlns:ac="urn:ac"', '') # We have to be sneaky to preserve the "ac" prefix in some elements.
+        for element in content_html.getchildren()
+    ))
 
-def get_confluence_mappings(confluence_client):
+def get_confluence_mappings(confluence_client, space_key):
     """
-    Retrieve existing page mappings from Confluence.abs
+    Retrieve existing page mappings from a Confluence space.
 
     :param confluence_client: The Confluence REST API client.
+    :param space_key: The short name of the target Confluence space.
     :returns: A list of mappings (confluence_id, docfx_uid, docfx_href).
     :type confluence_client: ConfluenceClient
+    :type space_key: str
     :rtype: list
     """
 
     mappings = []
 
     step = 50
-    uri_template="content?type=page&expand=metadata.properties.docfx&start={start}&limit={limit}"
+    uri_template="space/{space_key}/content?type=page&expand=metadata.properties.docfx&start={start}&limit={limit}"
 
     offset = 0
     while True:
         results = confluence_client.get_json(
-            uri_template.format(start=offset, limit=step)
+            uri_template.format(space_key=space_key, start=offset, limit=step)
         )
+        if "page" not in results:
+            raise Exception(results["message"])
+
+        results = results["page"]
         if results["size"] == 0:
             break # No more records.
 
