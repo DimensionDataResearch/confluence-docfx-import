@@ -41,5 +41,9 @@ hs_err_pid*
 # Compiled DocFX site
 **/_site/
 
+# Exported templates
+**/_exported_templates/
+
 # Project
 .vscode/.ropeproject/objectdb
+.idea/

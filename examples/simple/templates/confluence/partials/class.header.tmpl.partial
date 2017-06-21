@@ -5,7 +5,7 @@
 <div class="markdown level0 conceptual">{{{conceptual}}}</div>
 {{#inClass}}
 <div class="inheritance">
-  <h5>{{__global.inheritance}}</h5>
+  <h5>Inheritance hierarchy</h5>
   {{#inheritance}}
   <div class="level{{index}}">{{{specName.0.value}}}</div>
   {{/inheritance}}
@@ -17,7 +17,7 @@
 {{/derivedClasses}}
 {{#inheritedMembers.0}}
 <div class="inheritedMembers">
-  <h5>{{__global.inheritedMembers}}</h5>
+  <h5>Inherited Members</h5>
 {{/inheritedMembers.0}}
 {{#inheritedMembers}}
   <div>
@@ -32,20 +32,20 @@
 {{#inheritedMembers.0}}
 </div>
 {{/inheritedMembers.0}}
-<h6><strong>{{__global.namespace}}</strong>: {{{namespace.specName.0.value}}}</h6>
-<h6><strong>{{__global.assembly}}</strong>: {{assemblies.0}}.dll</h6>
-<h5 id="{{id}}_syntax">{{__global.syntax}}</h5>
+<h6><strong>Namespace</strong>: {{{namespace.specName.0.value}}}</h6>
+<h6><strong>Assembly</strong>: {{assemblies.0}}.dll</h6>
+<h5 id="{{id}}_syntax">Syntax</h5>
 <div class="codewrapper">
   <pre><code class="lang-{{_lang}} hljs">{{syntax.content.0.value}}</code></pre>
 </div>
 {{#syntax.parameters.0}}
-<h5 class="parameters">{{__global.parameters}}</h5>
+<h5 class="parameters">Parameters</h5>
 <table class="table table-bordered table-striped table-condensed">
   <thead>
     <tr>
-      <th>{{__global.type}}</th>
-      <th>{{__global.name}}</th>
-      <th>{{__global.description}}</th>
+      <th>Type</th>
+      <th>Name</th>
+      <th>Description</th>
     </tr>
   </thead>
   <tbody>
@@ -62,12 +62,12 @@
 </table>
 {{/syntax.parameters.0}}
 {{#syntax.return}}
-<h5 class="returns">{{__global.returns}}</h5>
+<h5 class="returns">Returns</h5>
 <table class="table table-bordered table-striped table-condensed">
   <thead>
     <tr>
-      <th>{{__global.type}}</th>
-      <th>{{__global.description}}</th>
+      <th>Type</th>
+      <th>Description</th>
     </tr>
   </thead>
   <tbody>
@@ -79,12 +79,12 @@
 </table>
 {{/syntax.return}}
 {{#syntax.typeParameters.0}}
-<h5 class="typeParameters">{{__global.typeParameters}}</h5>
+<h5 class="typeParameters">Type Parameters</h5>
 <table class="table table-bordered table-striped table-condensed">
   <thead>
     <tr>
-      <th>{{__global.name}}</th>
-      <th>{{__global.description}}</th>
+      <th>Name</th>
+      <th>Description</th>
     </tr>
   </thead>
   <tbody>
@@ -100,11 +100,11 @@
 </table>
 {{/syntax.typeParameters.0}}
 {{#remarks}}
-<h5 id="{{id}}_remarks"><strong>{{__global.remarks}}</strong></h5>
+<h5 id="{{id}}_remarks"><strong>Remarks</strong></h5>
 <div class="markdown level0 remarks">{{{remarks}}}</div>
 {{/remarks}}
 {{#example.0}}
-<h5 id="{{id}}_examples"><strong>{{__global.examples}}</strong></h5>
+<h5 id="{{id}}_examples"><strong>Examples</strong></h5>
 {{/example.0}}
 {{#example}}
 {{{.}}}

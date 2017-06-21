@@ -497,7 +497,7 @@ class ConfluenceClient(object):
 
         target_url = urlparse.urljoin(self.base_address, relative_url)
         response = self.session.get(target_url, **kwargs)
-
+        
         return response.json()
 
     def post_json(self, relative_url, data, **kwargs):
